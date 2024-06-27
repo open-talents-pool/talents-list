@@ -1,0 +1,27 @@
+{
+  "github_handle": "pesarkhobeee",
+  "name": "Farid Ahmadian",
+  "email_address": "ahmadian.farid.1988@gmail.com",
+  "contact_link": "https://pathseeker.ir/",
+  "primary_role_title": "Platform Engineer",
+  "country_of_residence": "Germany",
+  "city_of_residence": "",
+  "technical_skills": [
+    "Linux",
+    "bash",
+    "python",
+    "go",
+    "kubernetes",
+    "IAC",
+    "terraform",
+    "CD/CD"
+  ],
+  "communication_languages": [
+    "Faris",
+    "English"
+  ],
+  "willing_to_relocate": false,
+  "willing_for_remote_work": true,
+  "oldest_repository_date": "2011-02-23T16:16:29Z",
+  "updated_at": "2024-06-27T15:59:39.991986"
+}
