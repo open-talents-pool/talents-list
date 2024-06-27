@@ -1,0 +1,94 @@
+name: Register In Open Talents Pool
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'Name'
+        required: true
+        type: string
+      contact_link:
+        description: 'Contact Link, it can be your LinkedIn profile, personal website, or any link to your CV.'
+        required: true
+        type: string
+      email_address:
+        description: 'Email Address (optional), please read the readme.md file for more information.'
+        required: false
+        type: string
+      primary_role_title:
+        description: 'Primary Role Title'
+        required: true
+        type: string
+      country_of_residence:
+        description: 'Country that you are living in'
+        required: true
+        type: string
+      city_of_residence:
+        description: 'City that you are living in (optional)'
+        required: false
+        type: string
+      technical_skills:
+        description: 'Main Technical Skills (comma-separated)'
+        required: true
+        type: string
+      communication_languages:
+        description: 'Communication Languages (comma-separated)'
+        required: true
+        type: string
+      willing_to_relocate:
+        description: 'Willing to Relocate (true/false)'
+        required: true
+        type: boolean
+      willing_for_remote_work:
+        description: 'Willing for Remote Work (true/false)'
+        required: true
+        type: boolean
+
+jobs:
+  generate-json:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Register the talent
+        run: |
+          cp scripts/register-a-talent.py .
+          pip install requests
+          python register-a-talent.py \
+            --github-handle "${{ github.actor }}" \
+            --name "${{ github.event.inputs.name }}" \
+            --email-address "${{ github.event.inputs.email_address }}" \
+            --contact-link "${{ github.event.inputs.contact_link }}" \
+            --primary-role-title "${{ github.event.inputs.primary_role_title }}" \
+            --country-of-residence "${{ github.event.inputs.country_of_residence }}" \
+            --city-of-residence "${{ github.event.inputs.city_of_residence }}" \
+            --technical-skills "${{ github.event.inputs.technical_skills }}" \
+            --communication-languages "${{ github.event.inputs.communication_languages }}" \
+            --willing-to-relocate "${{ github.event.inputs.willing_to_relocate }}" \
+            --willing-for-remote-work "${{ github.event.inputs.willing_for_remote_work }}"
+
+      - name: Print Json file
+        run: cat ${{ github.actor }}.json
+
+      - name: Commit and push json file of registered talent
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'Add ${{ github.actor }}.json'
+          file_pattern: ${{ github.actor }}.json
+
+      - name: Register the talent in meilisearch
+        run: |
+          curl -X POST 'http://116.202.8.204:7700/indexes/talents/documents?primaryKey=github_handle' \
+          -H 'Content-Type: application/json' \
+          -H 'Authorization: Bearer ${{ env.MEILISEARCH_TOKEN }}' \
+          --data-binary @${{ github.actor }}.json
+        env:
+          MEILISEARCH_TOKEN: ${{ secrets.MEILISEARCH_TOKEN }}

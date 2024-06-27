@@ -1,0 +1,34 @@
+name: Remove Yourself From Open Talents Pool
+
+on:
+  workflow_dispatch:
+ 
+jobs:
+  remove-the-json:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: remove the talent json file
+        run: rm  ${{ github.actor }}.json
+
+      - name: Commit and push the changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'Remove ${{ github.actor }}.json'
+          file_pattern: ${{ github.actor }}.json
+
+      - name: Register the talent in meilisearch
+        run: |
+          curl -X DELETE 'http://116.202.8.204:7700/indexes/talents/documents/${{ github.actor }}' \
+          -H 'Authorization: Bearer ${{ env.MEILISEARCH_TOKEN }}' \
+        env:
+          MEILISEARCH_TOKEN: ${{ secrets.MEILISEARCH_TOKEN }}
